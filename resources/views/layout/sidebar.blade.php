@@ -44,6 +44,18 @@
       <i class="fas fa-fw fa-shopping-cart"></i>
       <span>Pemesanan</span></a>
   </li>
+  
+  <li class="nav-item">
+    <a class="nav-link" href="{{ route('tentang') }}">
+      <i class="fas fa-fw fa-shopping-cart"></i>
+      <span>Tentang Aplikasi</span></a>
+  </li>
+
+  <li class="nav-item">
+    <a class="nav-link" href="{{ route('produk_titipan') }}">
+      <i class="fas fa-fw fa-shopping-cart"></i>
+      <span>Produk Titipan</span></a>
+  </li>
 
   <li class="nav-item">
     <a class="nav-link" href="{{ route('register') }}">

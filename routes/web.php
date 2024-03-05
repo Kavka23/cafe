@@ -11,6 +11,11 @@ use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\PemesananController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\TransaksiController;
+use App\Http\Controllers\TentangController;
+use App\Http\Controllers\ProdukTitipanController;
+
+
+
 
 
 
@@ -36,19 +41,17 @@ Route::middleware('auth')->group(function () {
     Route::get('dashboard', function () {
         return view('layout.dashboard');
     })->name('dashboard');
+
+    
  
-    // Route::controller(ProductController::class)->prefix('products')->group(function () {
-    //     Route::get('', 'index')->name('products');
-    //     Route::get('create', 'create')->name('products.create');
-    //     Route::post('store', 'store')->name('products.store');
-    //     Route::get('show/{id}', 'show')->name('products.show');
-    //     Route::get('edit/{id}', 'edit')->name('products.edit');
-    //     Route::put('edit/{id}', 'update')->name('products.update');
-    //     Route::delete('destroy/{id}', 'destroy')->name('products.destroy');
-    // });
+    
 
     Route::resource('products', ProductController::class);
     Route::resource('stok', StokController::class);
+    
+
+
+
 
 
     Route::controller(KategoriController::class)->prefix('kategori')->group(function () {
@@ -95,9 +98,21 @@ Route::middleware('auth')->group(function () {
     Route::controller(PemesananController::class)->prefix('pemesanan')->group(function () {
         Route::get('', 'index')->name('pemesanan');
 
-        
-    
     });
+    Route::controller(TentangController::class)->prefix('tentang')->group(function () {
+        Route::get('', 'index')->name('tentang');
+
+    });
+    Route::controller(ProdukTitipanController::class)->prefix('produk_titipan')->group(function () {
+    Route::get('', 'index')->name('produk_titipan');
+    Route::post('', 'store')->name('produk_titipan.store'); // Menambahkan rute POST untuk aksi store
+    Route::patch('', 'update')->name('produk_titipan.update'); // Menambahkan rute POST untuk aksi store
+    Route::get('produk_titipan/export-pdf', [ProdukTitipanController::class, 'exportPDF'])->name('produk_titipan.exportPDF');
+    Route::post('produk_titipan/import-excel', [ProdukTitipanController::class, 'importExcel'])->name('produk_titipan.importExcel');
+
+    });
+
+    
     Route::post('/process-payment', [PaymentController::class, 'processPaymentAndGenerateReceipt'])->name('process.payment');
 
     
