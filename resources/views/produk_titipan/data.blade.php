@@ -1,5 +1,5 @@
 <div class="form-group mt-3">
-        <input type="text" class="form-control" id="searchInput" placeholder="Cari produk...">
+<input type="text" class="form-control" id="searchInput" placeholder="Cari produk...">
     </div>
     <div class="table-responsive mt-4">
         <table class="table table-bordered table-hover">
@@ -14,8 +14,6 @@
                     <th>Stok</th>
                     <th>Keterangan</th>
                     <th>Tools</th>
-
-
                 </tr>
             </thead>
             <tbody>
@@ -36,13 +34,13 @@
                         data-mode="edit" data-id="{{$pt->id}}" data-nama_produk="{{ $pt->nama_produk }}" data-nama_supplier="{{ $pt->nama_supplier }}"
                         data-harga_beli="{{ $pt->harga_beli }}"data-harga_jual="{{ $pt->harga_jual }}"data-stok="{{ $pt->stok }}"data-keterangan="{{ $pt->keterangan }}">
                             <i class="fas fa-edit"></i>
-                        </button>
-                            @csrf
-                            @method('DELETE')
-                            <button type="button" class="btn btn-danger btn-delete"  data-id="{{ $pt->id }}">
-                                <i class="fas fa-trash"></i>
                             </button>
-                        </form>
+                            <form method="post" action="{{ route('produk_titipan.destroy', $pt->id) }}" style="display:inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="button" class="btn text-danger delete-data btn-delete" data-id="{{ $pt->id }}">
+                        <i class="fas fa-trash"></i>
+                    </button>
                     </td>
                 </tr>
                 @endforeach

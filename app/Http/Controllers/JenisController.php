@@ -2,9 +2,15 @@
 
 namespace App\Http\Controllers;
 
+
+use Illuminate\Http\Request;
 use App\Models\Jenis;
 use App\Http\Requests\StoreJenisRequest;
 use App\Http\Requests\UpdateJenisRequest;
+use App\Exports\JenisExport; 
+use PDF;
+use App\Imports\JenisImport;
+use Excel;
 
 class JenisController extends Controller
 {
@@ -78,5 +84,26 @@ class JenisController extends Controller
         $jenis->delete();
   
         return redirect()->route('jenis')->with('success', 'Jenis dihapus sukses');
+    }
+    
+    public function exportPDF()
+    {
+        $jenisData = Jenis::all(); // Replace Product with your model
+        $pdf = PDF::loadView('jenis.pdf', compact('jenisData'));
+        return $pdf->download('jenis_.pdf');
+    }
+    // Metode untuk mengimpor data produk dari file Excel
+    public function import(Request $request)
+    {
+        // Memvalidasi apakah file yang diunggah adalah file Excel
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls',
+        ]);
+
+        // Mengimpor data dari file Excel menggunakan kelas ProductImport
+        Excel::import(new JenisImport, $request->file('file'));
+
+        // Mengembalikan respons dengan pesan sukses
+        return redirect()->back()->with('success', 'Data berhasil diimpor.');
     }
 }

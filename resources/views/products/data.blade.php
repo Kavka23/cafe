@@ -25,8 +25,14 @@
                                      data-deskripsi="{{ $rs->deskripsi }}">
                                      <i class="fas fa-edit"></i>
                                  </button> 
-                            <button class="btn btn-danger delete-product" data-id="{{ $rs->id }}">Hapus</button>
-                        </div>
+                                 <form method="post" action="{{ route('products.destroy', $rs->id) }}" style="display:inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="button" class="btn text-danger delete-data btn-delete" data-id="{{ $rs->id }}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </form>                        
+            </div>
                     </td>
                 </tr>
                 @endforeach

@@ -3,14 +3,16 @@
 @section('contents')
 
 <div class="container mt-5">
-    <!-- <div class="d-flex justify-content-between align-items-center">
-        <h1 class="mb-0">List Product</h1>
-        <a href="{{ route('products.create') }}" class="btn btn-primary">Tambah Product</a>
-    </div> -->
- 
+    <h1>Stok</h1>
+    
+<input type="text" class="form-control" id="searchInput" placeholder="Cari produk...">
+
+ <br>
 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#FormModalStok">
     Tambah
 </button>
+ <!-- Tombol Export PDF -->
+ <a href="{{ route('stok.exportPDF') }}" class="btn btn-success">Export PDF</a>
     <hr>
     @if(Session::has('success'))
     <div class="alert alert-success" role="alert">
@@ -111,5 +113,24 @@
             modal.find('.modal-body form').attr('action', '{{ url("stok") }}')
         }
     })
+    
+    document.getElementById("searchInput").addEventListener("keyup", function() {
+        var input, filter, table, tr, td, i, txtValue;
+        input = document.getElementById("searchInput");
+        filter = input.value.toUpperCase();
+        table = document.getElementById("stokTableBody");
+        tr = table.getElementsByTagName("tr");
+        for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[1]; // Change index if the column where you want to search is different
+            if (td) {
+                txtValue = td.textContent || td.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+    });
 </script>
 @endpush

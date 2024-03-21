@@ -1,237 +1,178 @@
-@extends('layout.app')
+@extends('layout.app', ['class' => 'g-sidenav-show bg-gray-100'])
 
-@section('title')
-@endsection
-
-
-
-@section('contents')    
-<div class="">
-    <div class="row">
-        <div class="col">
-            @foreach ($jenis as $j)
-            <div class="item-content">
-                <h3 class="mb-3">{{ $j->nama_jenis }}</h3>
-                <div class="row row-cols-1 row-cols-md-2 g-4">
-                    @foreach ($j->product as $product)
-                    <div class="col">
-                        <div class="card h-100">
-                            <img src="{{ asset('img') }}/{{ $product->img }}" class="card-img-top product-img" alt="{{ $product->nama_produk }}">
-                            <div class="card-body">
-                                <h5 class="card-title">{{ $product->nama_produk }}</h5>
-                                <p class="card-text">Rp. {{ number_format($product->harga, 0, ',', '.') }}</p>
-                                <!-- Tombol Add to Cart -->
-                                <button class="btn btn-primary add-to-cart" data-id="{{ $product->id }}" data-harga="{{ $product->harga }}">Add to Cart</button>
-                            </div>
-                        </div>
-                    </div>
+@section('contents')
+    <div class="row mt-4 p-3">
+        <div class="container col-md-8">
+            <div class="card item product">
+                <h5 class="card-header">Product</h5>
+                {{-- product --}}
+                <div class="p-4">
+                    @foreach ($jenis as $j)
+                        <h3>{{ $j->nama_jenis }}</h3>
+                        <ul class="product-item">
+                            @foreach ($j->product as $product)
+                                <li class="btn bg-gradient-warning" data-harga="{{ $product->harga }}"
+                                    data-id="{{ $product->id }}">
+                                    <img src="{{ asset('img/'.$product->img) }}" style="max-width: 100px;">
+                                    {{ $product->nama_produk }}
+                                </li>
+                            @endforeach
+                        </ul>
                     @endforeach
                 </div>
             </div>
-            @endforeach
         </div>
-
-        <div class="col">
-            <div class="card" style="width: 300px; margin-bottom: 20px;">
-                <div class="card-body">
-                    <h5 class="card-title">Order</h5>
+        <div class="container col-md-4">
+            <div class="card item content">
+                <h5 class="card-header">Order</h5>
+                <div class="p-4">
                     <ul class="ordered-list">
-                        <!-- Daftar pesanan akan ditampilkan di sini -->
-                    </ul>
-                    <p class="card-text">Total Bayar : <span id="total">0</span></p>
-                    <!-- Tombol Bayar -->
-<button id="btn-bayar" class="btn btn-primary">Bayar</button>
-                </div>
-            </div>
 
-            <div class="card" style="width: 300px; margin-bottom: 20px; display: none;" id="payment-form">
-                <div class="card-body">
-                    <h5 class="card-title">Form Pembayaran</h5>
-                    <form action="/process-payment" method="POST">
-                        @csrf
-                        <div class="mb-3">
-                            <label for="nama_pelanggan" class="form-label">Nama Pelanggan:</label>
-                            <input type="text" id="nama_pelanggan" name="nama_pelanggan" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="tanggal_beli" class="form-label">Tanggal Pembelian:</label>
-                            <input type="date" id="tanggal_beli" name="tanggal_beli" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="order_list" class="form-label">Order List:</label>
-                            <ul id="order_list" class="list-group mb-3">
-                                <!-- Isi dari order list akan ditambahkan menggunakan JavaScript -->
-                            </ul>
-                        </div>
-                        <div class="mb-3">
-                            <label for="subtotal" class="form-label">Subtotal:</label>
-                            <input type="text" id="subtotal" name="subtotal" class="form-control" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label for="bayar" class="form-label">Bayar:</label>
-                            <input type="text" id="bayar" name="bayar" class="form-control">
-                        </div>
-                        <div class="mb-3">
-                            <label for="kembalian" class="form-label">Kembalian:</label>
-                            <input type="text" id="kembalian" name="kembalian" class="form-control" readonly>
-                        </div>
-                        <button type="submit" class="btn btn-success">Proses Pembayaran</button>
-                    </form>
+                    </ul>
+                    <div>
+                        Total Bayar : <h2 id="total">0</h2>
+                    </div>
+                    <div>
+                        <button id="btn-bayar" type="submit" class="btn bg-gradient-info">Bayar</button>
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
-</div>
 @endsection
+
+{{-- @include('type.form') --}}
+
 @push('script')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script>
-    $(document).ready(function () {
-        const orderedList = [];
+   $(function() {
+       // Inisialisasi
+       const orderedList = []
+       let total = 0
 
-        // Menambahkan produk ke daftar pesanan saat tombol Add to Cart diklik
-        $(".add-to-cart").click(function () {
-            const id = $(this).data('id');
-            const product = $(this).closest('.card-body').find('.card-title').text();
-            const harga = parseFloat($(this).data('harga'));
+       const sum = () => {
+           return orderedList.reduce((accumulator, object) => {
+               return accumulator + (object.harga * object.qty);
+           }, 0)
+       };
 
-            // Mengecek apakah produk sudah ada dalam daftar pesanan
-            const index = orderedList.findIndex(item => item.id === id);
-            if (index !== -1) {
-                // Jika produk sudah ada, tambahkan jumlah pesanan (qty)
-                orderedList[index].qty++;
-            } else {
-                // Jika produk belum ada, tambahkan produk baru ke daftar pesanan
-                orderedList.push({ id: id, product: product, harga: harga, qty: 1 });
-            }
+       const changeQty = (el, inc) => {
+           // Ubah di array
+           const id = $(el).closest('li').data('id');
+           const index = orderedList.findIndex(list => list.product_id == id)
+           orderedList[index].qty += orderedList[index].qty == 1 && inc == -1 ? 0 : inc
 
-            // Menghitung total bayar dan memperbarui daftar pesanan
-            updateOrderList();
-        });
+           // Ubah qty dan ubah subtotal
+           const txt_subtotal = $(el).closest('li').find('.subtotal');
+           const txt_qty = $(el).closest('li').find('.qty-item')
+           txt_qty.val(parseInt(txt_qty.val()) == 1 && inc == -1 ? 1 : parseInt(txt_qty.val()) + inc)
+           txt_subtotal.text(orderedList[index].harga * orderedList[index].qty);
 
-        // Event untuk menambah jumlah pesanan (qty)
-        $(document).on('click', '.btn-increase', function () {
-            const index = $(this).data('index');
-            orderedList[index].qty++;
-            updateOrderList();
-        });
+           // Ubah jumlah total
+           $('#total').html(sum());
+       };
 
-        // Event untuk mengurangi jumlah pesanan (qty)
-        $(document).on('click', '.btn-decrease', function () {
-            const index = $(this).data('index');
-            if (orderedList[index].qty > 1) {
-                orderedList[index].qty--;
-                updateOrderList();
-            }
-        });
 
-        // Event untuk menghapus pesanan dari daftar
-        $(document).on('click', '.btn-cancel', function () {
-            const index = $(this).data('index');
-            orderedList.splice(index, 1);
-            updateOrderList();
-        });
+       $('.product-item li').click(function() {
+   // mengambil data
+   const product_clicked = $(this).text();
+   const data = $(this).data();
+   const harga = parseFloat(data.harga);
+   const id = parseInt(data.id);
 
-        // Fungsi untuk memperbarui daftar pesanan dan total bayar
-        function updateOrderList() {
-            let total = 0;
-            $('.ordered-list li').remove();
-            orderedList.forEach(function (data, index) {
-                $('.ordered-list').append('<li>' +
-                    data.product + ' <br> Rp. ' + data.harga + '      <br> ' +
-                    '<button class="btn btn-danger btn-sm btn-decrease" data-index="' + index + '">-</button> ' +
-                    '<span class="qty">' + data.qty + '</span> ' +
-                    '<button class="btn btn-success btn-sm btn-increase" data-index="' + index + '">+</button> <br> <br>' +
-                    '<button class="btn btn-warning btn-sm btn-cancel" data-index="' + index + '">Cancel</button> <br>' +
-                    '= ' + data.harga * data.qty + '</li>');
-                total += data.harga * data.qty;
+   // Cek apakah produk sudah ada dalam daftar pesanan
+   const existingItem = orderedList.find(item => item.product_id === id);
+   if (existingItem) {
+       // Jika sudah ada, tambahkan satu ke jumlah pesanan dan perbarui subtotal
+       existingItem.qty++;
+       const itemElement = $(`.ordered-list li[data-id="${id}"]`);
+       const qtyElement = itemElement.find('.qty-item');
+       const subtotalElement = itemElement.find('.subtotal');
+       qtyElement.val(existingItem.qty);
+       subtotalElement.text(existingItem.qty * existingItem.harga);
+   } else {
+       // Jika belum ada, tambahkan produk ke daftar pesanan
+       let newItem = {
+           'product_id': id,
+           'product': product_clicked,
+           'harga': harga,
+           'qty': 1
+       };
+       orderedList.push(newItem);
+
+       // Tambahkan elemen baru ke daftar pesanan
+       let listOrder = `<li data-id="${id}"><h3>${product_clicked}</h3>`;
+       listOrder += `Rp. ${harga} <br>`;
+       listOrder += `<button class="px-2 py-1 rounded text-white bg-gradient-danger remove-item" style="font-size: 12px; outline: none; border: none"><i class="fas fa-trash"></i></button>`;
+       listOrder += `<button class="px-2 py-1 rounded text-white bg-danger btn-dec" style="font-size: 12px; outline: none; border: none"><i class="fas fa-minus"></i></button>`;
+       listOrder += `<input class="qty-item" type="number" value="1" style="width:30px; font-size: 14px; outline: none; border: none;" readonly>`;
+       listOrder += `<button class="px-2 py-1 rounded text-white bg-success btn-inc" style="font-size: 12px; outline: none; border: none"><i class="fas fa-plus"></i></button> <br>`;
+       listOrder += `<span class="subtotal">${harga}</span>`;
+       listOrder += `</li>`;
+       $('.ordered-list').append(listOrder);
+   }
+
+   // Perbarui jumlah total pembayaran
+   $('#total').html(sum());
+});
+
+
+
+       // Event untuk mengubah quantity dan subtotal
+       $('.ordered-list').on('click', '.btn-dec', function() {
+           changeQty(this, -1)
+       });
+
+       $('.ordered-list').on('click', '.btn-inc', function() {
+           changeQty(this, 1)
+       });
+
+       $('.ordered-list').on('click', '.remove-item', function() {
+           const item = $(this).closest('li');
+           let index = orderedList.findIndex(list => list.id == parseInt(item.data('id')))
+           orderedList.splice(index, 1)
+           item.remove();
+           $('#total').html(sum());
+       });
+
+       // Event untuk melakukan pembayaran
+       $('#btn-bayar').on('click', function() {
+           $.ajax({
+               url: "{{ route('transaksi.store') }}",
+               method: "POST",
+               data: {
+                   "_token": "{{ csrf_token() }}",
+                   orderedList: orderedList,
+                   total: sum()
+               },
+               success: function(data) {
+                   console.log(data)
+                   Swal.fire({
+                       title: 'Sudah benar semua',
+                       showDenyButton: true,
+                       confirmButtonText: "Cetak Nota",
+                       denyButtonText: 'Okay',
+                        //
+
+                         // Posisi SweetAlert di tengah layar
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.open("{{ url('faktur') }}/"+data.notrans);
+                            location.reload();
+                        } else if (result.isDenied) {
+                            location.reload();
+                        }
+                    });
+                },
+                error: function(request, status, error) {
+    console.log(request.responseText);
+    Swal.fire('Pemesanan gagal. Terjadi kesalahan: ' + error);
+}
+
             });
-            $('#total').text(total);
-        }
-
-        // Tombol Bayar
-        $('#btn-bayar').click(function () {
-            // Menampilkan formulir pembayaran
-            $('#payment-form').show();
-
-            // Isi data pesanan ke dalam formulir pembayaran
-    let orderListHtml = '';
-    orderedList.forEach(function (data, index) {
-        orderListHtml += '<li>' +
-            data.product + ' x ' + data.qty + ' = ' + data.harga * data.qty + '</li>';
-    });
-    $('#order_list').html(orderListHtml);
-            // Menghitung total bayar
-            let total = 0;
-            orderedList.forEach(function (data) {
-                total += data.harga * data.qty;
-            });
-            $('#subtotal').val(total);
-        });
-
-        // Menghitung kembalian
-        $('#bayar').on('input', function () {
-            const bayar = parseFloat($(this).val());
-            const subtotal = parseFloat($('#subtotal').val());
-            const kembalian = bayar - subtotal;
-            $('#kembalian').val(kembalian);
         });
     });
 </script>
-@endpush
-
-@push('style')
-<style>
-    .product-container {
-        list-style-type: none;
-    }
-
-    .product-container li {
-        margin-bottom: 20px;
-    }
-
-    .product-container li h3 {
-        text-transform: uppercase;
-        font-weight: bold;
-        font-size: 18px;
-        background-color: aliceblue;
-        padding: 5px 15px;
-    }
-
-    .product-item {
-        list-style-type: none;
-        display: flex;
-        gap: lem;
-        margin: 10px 20px;
-    }
-
-    .product-item li {
-        background-color: beige;
-        padding: 10px 20px;
-    }
-
-    .c {
-        width: 700px;
-        display: flex;
-        flex-direction: column;
-        margin: auto;
-    }
-
-    .container {
-        border: 1px solid pink;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        grid-gap: 20px;
-        padding: 0px;
-    }
-
-    .item-content {
-        width: 400px;
-    }
-
-    .product-img {
-        width: 100%;
-        height: 100px; /* Ubah sesuai dengan kebutuhan Anda */
-        object-fit: cover;
-    }
-</style>
 @endpush

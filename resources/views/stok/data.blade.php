@@ -1,5 +1,4 @@
 <div class="form-group mt-3">
-        <input type="text" class="form-control" id="searchInput" placeholder="Cari produk...">
     </div>
     <div class="table-responsive mt-4">
         <table class="table table-bordered table-hover">
@@ -12,7 +11,7 @@
                     <th>Tools</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="stokTableBody">
                 @foreach ($stok as $s)
                 <tr>
                     <td>{{ $i = !isset ($i) ? ($i = 1) : ++$i }}</td>
@@ -20,7 +19,7 @@
                     <td>{{ $s->stok }}</td>
                     <td>
                         <button class="btn btn-success" data-toggle="modal" data-target="#FormModalStok" 
-                        data-mode="edit" data-id="{{$s->id}}" data-product_id="{{ $s->products_id }}" data-stok="{{ $s->stok }}">
+                        data-mode="edit" data-id="{{$s->id}}" data-nama_produk="{{ $s->products->nama_produk }}" data-stok="{{ $s->stok }}">
                             <i class="fas fa-edit"></i>
                         </button>
                             @csrf

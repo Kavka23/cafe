@@ -23,7 +23,7 @@ class PemesananController extends Controller
         $data['pemesanans'] = Pemesanan::orderBy('created_at', 'DESC')->get();
         $data['product'] = Product::orderBy('created_at', 'DESC')->get();
         $jenis = Jenis::all();
-        return view('pemesanan.index', compact('data', 'jenis'));
+        return view('pemesanan.index')->with($data);
     }
 
     /**
@@ -78,4 +78,9 @@ class PemesananController extends Controller
         $pemesanan->delete();
         return redirect('pemesanan')->with('success', 'Data pemesanan berhasil dihapus!');
     }
+    public function showPaymentForm()
+{
+    return view('payment_form');
+}
+
 }

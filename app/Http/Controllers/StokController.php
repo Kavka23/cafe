@@ -6,6 +6,8 @@ use App\Models\Stok;
 use App\Models\Product;
 use App\Http\Requests\StoreStokRequest;
 use App\Http\Requests\UpdateStokRequest;
+use App\Exports\StokExport; 
+use PDF;
 
 Class StokController extends Controller
 {
@@ -94,5 +96,11 @@ Class StokController extends Controller
         Stok::find($id)->delete();
   
         return redirect()->route('stok')->with('success', 'Stok dihapus sukses');
+    }
+    public function exportPDF()
+    {
+        $stokData = Stok::all(); // Replace Product with your model
+        $pdf = PDF::loadView('stok.pdf', compact('stokData'));
+        return $pdf->download('stok_.pdf');
     }
 }

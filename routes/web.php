@@ -13,6 +13,8 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\TentangController;
 use App\Http\Controllers\ProdukTitipanController;
+use App\Http\Controllers\DetailTransaksiController;
+
 
 
 
@@ -47,22 +49,15 @@ Route::middleware('auth')->group(function () {
     
 
     Route::resource('products', ProductController::class);
+    Route::get('generate/products', [ProductController::class , 'exportPDF'])->name('products.exportPDF');
+    Route::post('/products/import', [ProductController::class , 'import'])->name('products.importExcel');
+    Route::get('nota/{nofaktur}', [TransaksiController::class,'faktur']);
     Route::resource('stok', StokController::class);
+
     
 
 
-
-
-
-    Route::controller(KategoriController::class)->prefix('kategori')->group(function () {
-        Route::get('', 'index')->name('kategori');
-        Route::get('create', 'create')->name('kategori.create');
-        Route::post('store', 'store')->name('kategori.store');
-        Route::get('show/{id}', 'show')->name('kategori.show');
-        Route::get('edit/{id}', 'edit')->name('kategori.edit');
-        Route::put('edit/{id}', 'update')->name('Kategori.update');
-        Route::delete('destroy/{id}', 'destroy')->name('kategori.destroy');
-    });
+  
 
     Route::controller(JenisController::class)->prefix('jenis')->group(function () {
         Route::get('', 'index')->name('jenis');
@@ -72,6 +67,10 @@ Route::middleware('auth')->group(function () {
         Route::get('edit/{id}', 'edit')->name('jenis.edit');
         Route::put('edit/{id}', 'update')->name('jenis.update');
         Route::delete('destroy/{id}', 'destroy')->name('jenis.destroy');
+        Route::get('generate/jenis', [JenisController::class , 'exportPDF'])->name('jenis.exportPDF');
+        Route::post('/jenis/import', [JenisController::class , 'import'])->name('jenis.importExcel');
+
+
     });
  
     Route::controller(StokController::class)->prefix('stok')->group(function () {
@@ -82,6 +81,8 @@ Route::middleware('auth')->group(function () {
         Route::get('edit/{id}', 'edit')->name('stok.edit');
         Route::put('edit/{id}', 'update')->name('stok.update');
         Route::delete('destroy/{id}', 'destroy')->name('stok.destroy');
+        Route::get('generate/stok', [StokController::class , 'exportPDF'])->name('stok.exportPDF');
+
     });
 
     Route::controller(PelangganController::class)->prefix('pelanggan')->group(function () {
@@ -92,11 +93,15 @@ Route::middleware('auth')->group(function () {
         Route::get('edit/{id}', 'edit')->name('pelanggan.edit');
         Route::put('edit/{id}', 'update')->name('pelanggan.update');
         Route::delete('destroy/{id}', 'destroy')->name('pelanggan.destroy');
+        Route::get('generate/pelanggan', [PelangganController::class , 'exportPDF'])->name('pelanggan.exportPDF');
+
     });
  
 
     Route::controller(PemesananController::class)->prefix('pemesanan')->group(function () {
         Route::get('', 'index')->name('pemesanan');
+        Route::resource('transaksi', TransaksiController::class);
+        Route::get('nota/{nofaktur}', [TransaksiController::class, 'faktur']);
 
     });
     Route::controller(TentangController::class)->prefix('tentang')->group(function () {
@@ -105,7 +110,8 @@ Route::middleware('auth')->group(function () {
     });
     Route::controller(ProdukTitipanController::class)->prefix('produk_titipan')->group(function () {
     Route::get('', 'index')->name('produk_titipan');
-    Route::post('', 'store')->name('produk_titipan.store'); // Menambahkan rute POST untuk aksi store
+    Route::post('', 'store')->name('produk_titipan.store');
+    Route::delete('destroy/{id}', 'destroy')->name('produk_titipan.destroy');
     Route::patch('', 'update')->name('produk_titipan.update'); // Menambahkan rute POST untuk aksi store
     Route::get('produk_titipan/export-pdf', [ProdukTitipanController::class, 'exportPDF'])->name('produk_titipan.exportPDF');
     Route::post('produk_titipan/import-excel', [ProdukTitipanController::class, 'importExcel'])->name('produk_titipan.importExcel');
@@ -114,14 +120,6 @@ Route::middleware('auth')->group(function () {
 
     
     Route::post('/process-payment', [PaymentController::class, 'processPaymentAndGenerateReceipt'])->name('process.payment');
-
-    
-
-    
-    Route::resource('transaksi', TransaksiController::class);
-    // Route::resource('transaksi', [TransaksiController::class, 'faktur']);
-// routes/web.php
-
 
 
 Route::post('/process-payment', function (Illuminate\Http\Request $request) {
@@ -157,4 +155,9 @@ Route::post('/process-payment', function (Illuminate\Http\Request $request) {
 });
 
 
-});
+
+    // Tambahkan rute lainnya yang hanya bisa diakses oleh kasir di sini
+}
+
+
+);

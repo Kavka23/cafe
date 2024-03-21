@@ -22,7 +22,7 @@ class Product extends Model
 
 
     public function jenis(){
-        return $this->belongsTo(jenis::class);
+        return $this->belongsTo(Jenis::class,'jenis_id');
     }
     public function stok(){
         return $this->HasOne(stok::class);

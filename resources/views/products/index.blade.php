@@ -1,10 +1,48 @@
 @extends('layout.app')
 
 @section('contents')
+<h1>Produk Makanan & Minuman</h1>
 <div class="container mt-5">
     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#formModalProduk">
         Tambah
     </button>
+     <!-- Tombol Export PDF -->
+     <a href="{{ route('products.exportPDF') }}" class="btn btn-success">Export PDF</a>
+
+<!-- Tombol Import Excel -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#importModal">Import Excel</button>
+
+<!-- Modal Import Excel -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ route('products.importExcel') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="importModalLabel">Import Excel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Pilih file Excel</label>
+                        <input class="form-control" type="file" name="file" id="file">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-primary">Import</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+    <div class="container mt-5">
+    <!-- Tambahkan tombol lainnya sesuai kebutuhan -->
+    <hr>
+    <!-- Sisanya dari tampilan Anda -->
+</div>
+
     <hr>
     @if(Session::has('success'))
     <div class="alert alert-success" role="alert">
@@ -36,6 +74,7 @@
             modal.find('#harga').val(harga);
             modal.find('#jenis_id').val(jenis_id);
             modal.find('#deskripsi').val(deskripsi);
+            modal.find('#foto_sebelumnya').attr('src', btn.data('foto_sebelumnya'));
             modal.find('.modal-body form').attr('action', '{{ url('products') }}/' + id);
         } else {
             modal.find('#nama_produk').val('');
@@ -67,44 +106,23 @@
         }
     });
 
-    document.querySelectorAll('.delete-product').forEach(item => {
-        item.addEventListener('click', function() {
-            let data = this.getAttribute('data-id');
-            Swal.fire({
-                title: 'Apakah Anda yakin?',
-                text: "Anda tidak akan bisa mengembalikan data yang sudah dihapus!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, hapus saja!',
-                cancelButtonText: 'Batalkan'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    deleteProduct(data);
-                }
-            });
-        });
-    });
-
-    function deleteProduct(data) {
-        fetch(`/products/destroy/${data}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json'
-            }
+    $('.delete-data').on('click', function(e) {
+        console.log('deleteeee')
+        e.preventDefault()
+        const data = $(this).closest('tr').find('td:eq(1)').text()
+        Swal.fire({
+            title: `Apakah data <span style ="color:red">${data}</span> akan dihapus?`,
+            text: "data tidak bisa dikembalikan!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Ya, hapus data ini!'
+        }).then((result) => {
+            if (result.isConfirmed)
+                $(e.target).closest('form').submit()
+            else swal.close()
         })
-        .then(response => {
-            if (response.ok) {
-                location.reload();
-            } else {
-                throw new Error('Network response was not ok');
-            }
-        })
-        .catch(error => {
-            console.error('There has been a problem with your fetch operation:', error);
-        });
-    }
+    })
+    
 </script>
 @endpush

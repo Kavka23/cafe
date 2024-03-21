@@ -25,4 +25,5 @@ class PaymentController extends Controller
         // Kembalikan struk PDF sebagai respons
         return response()->file($filePath);
     }
+    
 }

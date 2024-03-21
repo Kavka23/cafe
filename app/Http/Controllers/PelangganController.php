@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Pelanggan;
 use App\Http\Requests\StorePelangganRequest;
 use App\Http\Requests\UpdatePelangganRequest;
+use App\Exports\PelangganExport; 
+use PDF;
+
 
 class PelangganController extends Controller
 {
@@ -78,5 +81,11 @@ class PelangganController extends Controller
         $pelanggan->delete();
   
         return redirect()->route('pelanggan')->with('success', 'pelanggan dihapus sukses');
+    }
+    public function exportPDF()
+    {
+        $pelangganData = Pelanggan::all(); // Replace Product with your model
+        $pdf = PDF::loadView('pelanggan.pdf', compact('pelangganData'));
+        return $pdf->download('pelanggan_.pdf');
     }
 }

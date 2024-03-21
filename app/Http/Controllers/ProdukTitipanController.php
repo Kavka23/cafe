@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\View;
 
 
 
+
 class ProdukTitipanController extends Controller
 {
     /**
@@ -75,12 +76,14 @@ class ProdukTitipanController extends Controller
     return redirect()->route('produk_titipan')->with('success', 'Produk titipan berhasil diperbarui');
 }
 
-public function destroy(ProdukTitipan $id)
+public function destroy(ProdukTitipan $produkTitipan    )
 {
-    $id = ProdukTitipan::findOrFail($id);
+
+    $produkTitipan->delete();
   
-    ProdukTitipan::find($id)->delete();
-    return redirect()->route('produk_titipan')->with('success', 'pelanggan dihapus sukses');
+    return redirect()->route('produk_titipan')->with('success', 'Produk titipan berhasil dihapus.');
+
+
 }
 public function exportPDF()
 {
